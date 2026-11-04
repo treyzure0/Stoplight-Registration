@@ -35,10 +35,6 @@
                    placeholder="Derived from father's surname, e.g. Mugisha">
             <span class="form-hint">The family will be named after the father's surname.</span>
           </div>
-          <div class="form-group">
-            <label for="family_area">Family Area of Residence</label>
-            <input type="text" id="family_area" name="family_area" placeholder="Village, Town, District">
-          </div>
         </div>
       </div>
 
@@ -48,7 +44,7 @@
           <select name="family_id" id="family_id">
             <option value="">-- Choose a Family --</option>
             {% for fam in families %}
-            <option value="{{ fam.id }}">{{ fam.family_name }} Family{% if fam.area_of_residence %} — {{ fam.area_of_residence }}{% endif %}</option>
+            <option value="{{ fam.id }}">{{ fam.family_name }} Family</option>
             {% endfor %}
           </select>
         </div>
