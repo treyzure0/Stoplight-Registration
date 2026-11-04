@@ -315,19 +315,19 @@ def get_dashboard_stats():
     recent = []
     for sm in SchoolMember.query.order_by(SchoolMember.created_at.desc()).limit(4).all():
         recent.append({'name': sm.full_name, 'category': 'School', 'role': sm.role,
-                       'area': sm.area_of_residence or '', 'date': sm.created_at.strftime('%Y-%m-%d'),
+                       'email': sm.email or '', 'date': sm.created_at.strftime('%Y-%m-%d'),
                        'uid': sm.unique_id})
     for fm in FamilyMember.query.order_by(FamilyMember.created_at.desc()).limit(4).all():
         recent.append({'name': fm.full_name, 'category': 'Family', 'role': fm.role,
-                       'area': fm.area_of_residence or '', 'date': fm.created_at.strftime('%Y-%m-%d'),
+                       'email': fm.email or '', 'date': fm.created_at.strftime('%Y-%m-%d'),
                        'uid': fm.unique_id})
     for om in OrgMember.query.order_by(OrgMember.created_at.desc()).limit(2).all():
         recent.append({'name': om.full_name, 'category': 'Organization', 'role': om.role or '',
-                       'area': om.area_of_residence or '', 'date': om.created_at.strftime('%Y-%m-%d'),
+                       'email': om.email or '', 'date': om.created_at.strftime('%Y-%m-%d'),
                        'uid': om.unique_id})
     for ind in Individual.query.order_by(Individual.created_at.desc()).limit(2).all():
         recent.append({'name': ind.full_name, 'category': 'Individual', 'role': ind.occupation or '',
-                       'area': ind.area_of_residence or '', 'date': ind.created_at.strftime('%Y-%m-%d'),
+                       'email': ind.email or '', 'date': ind.created_at.strftime('%Y-%m-%d'),
                        'uid': ind.unique_id})
     recent.sort(key=lambda x: x['date'], reverse=True)
 
@@ -429,7 +429,7 @@ def register_school():
         names  = request.form.getlist('member_name[]')
         roles  = request.form.getlist('member_role[]')
         custom = request.form.getlist('member_custom_role[]')
-        areas  = request.form.getlist('member_area[]')
+        emails = request.form.getlist('member_email[]')
         phones = request.form.getlist('member_phone[]')
 
         added = 0
@@ -439,13 +439,13 @@ def register_school():
                 continue
             role = roles[i] if i < len(roles) else 'Other'
             crole = custom[i] if i < len(custom) else ''
-            area  = areas[i]  if i < len(areas)  else ''
+            email = emails[i] if i < len(emails) else ''
             phone = phones[i] if i < len(phones)  else ''
             uid = generate_uid('SM')
             qr_data = f"STOPLIGHT|SCHOOL|{uid}|{name}|{role}"
             qr_file = generate_qr_code(qr_data, uid)
             member = SchoolMember(unique_id=uid, school_id=school.id, full_name=name,
-                                  role=role, custom_role=crole, area_of_residence=area,
+                                  role=role, custom_role=crole, email=email,
                                   phone=phone, qr_path=qr_file,
                                   created_by=current_user.id)
             db.session.add(member)
@@ -518,7 +518,7 @@ def register_family():
 
         names  = request.form.getlist('member_name[]')
         roles  = request.form.getlist('member_role[]')
-        areas  = request.form.getlist('member_area[]')
+        emails = request.form.getlist('member_email[]')
         phones = request.form.getlist('member_phone[]')
 
         added = 0
@@ -527,13 +527,13 @@ def register_family():
             if not name:
                 continue
             role  = roles[i] if i < len(roles) else 'Other'
-            area  = areas[i] if i < len(areas) else family.area_of_residence or ''
+            email = emails[i] if i < len(emails) else ''
             phone = phones[i] if i < len(phones) else ''
             uid = generate_uid('FM')
             qr_data = f"STOPLIGHT|FAMILY|{uid}|{name}|{role}"
             qr_file = generate_qr_code(qr_data, uid)
             member = FamilyMember(unique_id=uid, family_id=family.id, full_name=name,
-                                  role=role, area_of_residence=area,
+                                  role=role, email=email,
                                   phone=phone, qr_path=qr_file, created_by=current_user.id)
             db.session.add(member)
             added += 1
@@ -605,7 +605,7 @@ def register_organization():
 
         names  = request.form.getlist('member_name[]')
         roles  = request.form.getlist('member_role[]')
-        areas  = request.form.getlist('member_area[]')
+        emails = request.form.getlist('member_email[]')
         phones = request.form.getlist('member_phone[]')
 
         added = 0
@@ -614,13 +614,13 @@ def register_organization():
             if not name:
                 continue
             role  = roles[i] if i < len(roles) else ''
-            area  = areas[i] if i < len(areas) else org.area_of_residence or ''
+            email = emails[i] if i < len(emails) else ''
             phone = phones[i] if i < len(phones) else ''
             uid = generate_uid('OM')
             qr_data = f"STOPLIGHT|ORG|{uid}|{name}|{role}"
             qr_file = generate_qr_code(qr_data, uid)
             member = OrgMember(unique_id=uid, org_id=org.id, full_name=name,
-                               role=role, area_of_residence=area, phone=phone,
+                               role=role, email=email, phone=phone,
                                qr_path=qr_file, created_by=current_user.id)
             db.session.add(member)
             added += 1
@@ -669,7 +669,7 @@ def register_individual():
     if request.method == 'POST':
         full_name  = request.form.get('full_name', '').strip()
         occupation = request.form.get('occupation', '').strip()
-        area       = request.form.get('area_of_residence', '').strip()
+        email      = request.form.get('email', '').strip()
         phone      = request.form.get('phone', '').strip()
 
         if not full_name:
@@ -688,7 +688,7 @@ def register_individual():
         qr_data = f"STOPLIGHT|INDIVIDUAL|{uid}|{full_name}|{occupation}"
         qr_file = generate_qr_code(qr_data, uid)
         ind = Individual(unique_id=uid, full_name=full_name, occupation=occupation,
-                         area_of_residence=area,
+                         email=email,
                          phone=phone, qr_path=qr_file, created_by=current_user.id)
         db.session.add(ind)
         db.session.commit()
@@ -790,7 +790,7 @@ def import_confirm():
                     qr_file = generate_qr_code(qr_data, uid)
                     ind = Individual(unique_id=uid, full_name=name,
                                      occupation=str(row.get('Occupation', '')),
-                                     area_of_residence=str(row.get('Area of Residence', '')),
+                                     email=str(row.get('Email', '')),
                                      phone=str(row.get('Phone', '')),
                                      qr_path=qr_file, created_by=current_user.id)
                     db.session.add(ind)
@@ -819,7 +819,7 @@ def import_confirm():
                     qr_data = f"STOPLIGHT|SCHOOL|{uid}|{mname}|{role}"
                     qr_file = generate_qr_code(qr_data, uid)
                     m = SchoolMember(unique_id=uid, school_id=school.id, full_name=mname,
-                                     role=role, area_of_residence=str(row.get('Area of Residence', '')),
+                                     role=role, email=str(row.get('Email', '')),
                                      qr_path=qr_file, created_by=current_user.id)
                     db.session.add(m)
                     imported += 1
@@ -847,7 +847,7 @@ def import_confirm():
                     qr_data = f"STOPLIGHT|FAMILY|{uid}|{mname}|{role}"
                     qr_file = generate_qr_code(qr_data, uid)
                     m = FamilyMember(unique_id=uid, family_id=fam.id, full_name=mname,
-                                     role=role, area_of_residence=str(row.get('Area of Residence', '')),
+                                     role=role, email=str(row.get('Email', '')),
                                      qr_path=qr_file, created_by=current_user.id)
                     db.session.add(m)
                     imported += 1
@@ -875,7 +875,7 @@ def import_confirm():
                     qr_data = f"STOPLIGHT|ORG|{uid}|{mname}|{role}"
                     qr_file = generate_qr_code(qr_data, uid)
                     m = OrgMember(unique_id=uid, org_id=org.id, full_name=mname,
-                                  role=role, area_of_residence=str(row.get('Area of Residence', '')),
+                                  role=role, email=str(row.get('Email', '')),
                                   phone=str(row.get('Phone', '')),
                                   qr_path=qr_file, created_by=current_user.id)
                     db.session.add(m)
