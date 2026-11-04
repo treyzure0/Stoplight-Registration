@@ -34,7 +34,7 @@ body { background: white; margin: 0; }
         <th>Full Name</th>
         <th>Role</th>
         <th>Area of Residence</th>
-        <th>Email</th>
+        <th>Phone</th>
       </tr>
     </thead>
     <tbody>
@@ -45,7 +45,7 @@ body { background: white; margin: 0; }
         <td class="fw-700">{{ m.full_name }}</td>
         <td>{{ m.custom_role or m.role }}</td>
         <td>{{ m.area_of_residence or '—' }}</td>
-        <td>{{ m.email or '—' }}</td>
+        <td>{{ m.phone or '—' }}</td>
       </tr>
       {% endfor %}
     </tbody>
