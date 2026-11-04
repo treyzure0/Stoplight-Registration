@@ -503,7 +503,6 @@ def register_family():
                 return redirect(url_for('register_family'))
         else:
             fname_input = request.form.get('family_name', '').strip()
-            farea       = request.form.get('family_area', '').strip()
             if not fname_input:
                 flash('Family name is required.', 'error')
                 return redirect(url_for('register_family'))
@@ -512,7 +511,7 @@ def register_family():
                 flash(f'Family "{fname_input}" already exists.', 'warning')
                 return redirect(url_for('register_family'))
             family = Family(unique_id=generate_uid('FAM'), family_name=fname_input,
-                            area_of_residence=farea, created_by=current_user.id)
+                            created_by=current_user.id)
             db.session.add(family)
             db.session.flush()
 
@@ -590,7 +589,6 @@ def register_organization():
                 return redirect(url_for('register_organization'))
         else:
             org_name = request.form.get('org_name', '').strip()
-            org_area = request.form.get('org_area', '').strip()
             if not org_name:
                 flash('Organization name is required.', 'error')
                 return redirect(url_for('register_organization'))
@@ -599,7 +597,7 @@ def register_organization():
                 flash(f'Organization "{org_name}" already exists.', 'warning')
                 return redirect(url_for('register_organization'))
             org = Organization(unique_id=generate_uid('ORG'), name=org_name,
-                               area_of_residence=org_area, created_by=current_user.id)
+                               created_by=current_user.id)
             db.session.add(org)
             db.session.flush()
 
@@ -838,7 +836,6 @@ def import_confirm():
                     fam = Family.query.filter(func.lower(Family.family_name) == fname.lower()).first()
                     if not fam:
                         fam = Family(unique_id=generate_uid('FAM'), family_name=fname,
-                                     area_of_residence=str(row.get('Area of Residence', '')),
                                      created_by=current_user.id)
                         db.session.add(fam)
                         db.session.flush()
@@ -866,7 +863,6 @@ def import_confirm():
                     org = Organization.query.filter(func.lower(Organization.name) == oname.lower()).first()
                     if not org:
                         org = Organization(unique_id=generate_uid('ORG'), name=oname,
-                                           area_of_residence=str(row.get('Area of Residence', '')),
                                            created_by=current_user.id)
                         db.session.add(org)
                         db.session.flush()
